@@ -22,7 +22,6 @@ export function setClick(selector, callback) {
   qs(selector).addEventListener("click", callback);
 }
 
-// update cart count badge on cart icon in header
 export function updateCartCount() {
   const cartItems = getLocalStorage("so-cart");
   const count = Array.isArray(cartItems) ? cartItems.length : cartItems ? 1 : 0;

@@ -13,7 +13,6 @@ function addProductToCart(product) {
   updateCartCount();
 }
 
-// add to cart button event handler
 async function addToCartHandler(e) {
   const product = await dataSource.findProductById(e.target.dataset.id);
   if (product) {
@@ -21,10 +20,8 @@ async function addToCartHandler(e) {
   }
 }
 
-// initialize cart count on product page load
 updateCartCount();
 
-// add listener to Add to Cart button
 const addToCartBtn = document.getElementById("addToCart");
 if (addToCartBtn) {
   addToCartBtn.addEventListener("click", addToCartHandler);
