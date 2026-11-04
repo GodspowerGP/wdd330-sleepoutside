@@ -1,13 +1,57 @@
-import { getLocalStorage } from "./utils.mjs";
+import { getLocalStorage, setLocalStorage, updateCartCount } from "./utils.mjs";
 
-function renderCartContents() {
-  const cartItems = getLocalStorage("so-cart");
-  const htmlItems = cartItems.map((item) => cartItemTemplate(item));
-  document.querySelector(".product-list").innerHTML = htmlItems.join("");
+function calculateCartTotal(cartItems) {
+  const cartFooter = document.querySelector(".cart-footer");
+  const totalAmountEl = document.querySelector("#cart-total-amount");
+
+  if (!cartItems || cartItems.length === 0) {
+    if (cartFooter) {
+      cartFooter.classList.add("hide");
+    }
+    return;
+  }
+
+  const total = cartItems.reduce(
+    (sum, item) =>
+      sum + (Number(item.FinalPrice) || Number(item.ListPrice) || 0),
+    0,
+  );
+
+  if (totalAmountEl) {
+    totalAmountEl.textContent = `$${total.toFixed(2)}`;
+  }
+  if (cartFooter) {
+    cartFooter.classList.remove("hide");
+  }
 }
 
-function cartItemTemplate(item) {
-  const newItem = `<li class="cart-card divider">
+function renderCartContents() {
+  const cartItems = getLocalStorage("so-cart") || [];
+  const productList = document.querySelector(".product-list");
+
+  if (!cartItems || cartItems.length === 0) {
+    productList.innerHTML =
+      '<li class="cart-empty">Your cart is currently empty.</li>';
+    calculateCartTotal([]);
+    updateCartCount();
+    return;
+  }
+
+  const htmlItems = cartItems.map((item, index) =>
+    cartItemTemplate(item, index),
+  );
+  productList.innerHTML = htmlItems.join("");
+  calculateCartTotal(cartItems);
+  updateCartCount();
+  addRemoveItemListeners();
+}
+
+function cartItemTemplate(item, index) {
+  const colorName =
+    item.Colors && item.Colors[0] ? item.Colors[0].ColorName : "";
+
+  return `<li class="cart-card divider">
+  <button class="cart-card__remove" data-index="${index}" data-id="${item.Id}" title="Remove item" aria-label="Remove ${item.Name}">✕</button>
   <a href="#" class="cart-card__image">
     <img
       src="${item.Image}"
@@ -17,12 +61,27 @@ function cartItemTemplate(item) {
   <a href="#">
     <h2 class="card__name">${item.Name}</h2>
   </a>
-  <p class="cart-card__color">${item.Colors[0].ColorName}</p>
+  <p class="cart-card__color">${colorName}</p>
   <p class="cart-card__quantity">qty: 1</p>
   <p class="cart-card__price">$${item.FinalPrice}</p>
 </li>`;
+}
 
-  return newItem;
+function removeItemFromCart(index) {
+  const cartItems = getLocalStorage("so-cart") || [];
+  cartItems.splice(index, 1);
+  setLocalStorage("so-cart", cartItems);
+  renderCartContents();
+}
+
+function addRemoveItemListeners() {
+  const removeButtons = document.querySelectorAll(".cart-card__remove");
+  removeButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const index = parseInt(e.currentTarget.dataset.index, 10);
+      removeItemFromCart(index);
+    });
+  });
 }
 
 renderCartContents();

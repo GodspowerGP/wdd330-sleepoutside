@@ -21,3 +21,26 @@ export function setClick(selector, callback) {
   });
   qs(selector).addEventListener("click", callback);
 }
+
+// update cart count badge on cart icon in header
+export function updateCartCount() {
+  const cartItems = getLocalStorage("so-cart");
+  const count = Array.isArray(cartItems) ? cartItems.length : cartItems ? 1 : 0;
+
+  const cartLink = document.querySelector(".cart a");
+  if (!cartLink) return;
+
+  let badge = cartLink.querySelector(".cart-count");
+  if (!badge) {
+    badge = document.createElement("span");
+    badge.className = "cart-count";
+    cartLink.appendChild(badge);
+  }
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.classList.remove("hide");
+  } else {
+    badge.classList.add("hide");
+  }
+}
