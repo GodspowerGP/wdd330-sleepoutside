@@ -1,28 +1,51 @@
-import { getLocalStorage, setLocalStorage, updateCartCount } from "./utils.mjs";
-import ProductData from "./ProductData.mjs";
+import {
+  addItemToCartList,
+  getCartItems,
+  saveCartItems,
+  updateCartCount,
+} from './utils.mjs';
+import ProductData from './ProductData.mjs';
 
-const dataSource = new ProductData("tents");
+const dataSource = new ProductData('tents');
+
+function showAddedFeedback(button, quantity) {
+  const container = button.parentElement;
+  if (!container) return;
+
+  let feedback = container.querySelector('.cart-feedback');
+  if (!feedback) {
+    feedback = document.createElement('p');
+    feedback.className = 'cart-feedback';
+    feedback.setAttribute('role', 'status');
+    feedback.setAttribute('aria-live', 'polite');
+    container.appendChild(feedback);
+  }
+
+  feedback.textContent =
+    quantity > 1
+      ? `Updated cart quantity to ${quantity}.`
+      : 'Added to cart (Qty: 1).';
+}
 
 function addProductToCart(product) {
-  let cart = getLocalStorage("so-cart");
-  if (!Array.isArray(cart)) {
-    cart = cart ? [cart] : [];
-  }
-  cart.push(product);
-  setLocalStorage("so-cart", cart);
-  updateCartCount();
+  const updatedCart = addItemToCartList(getCartItems(), product);
+  saveCartItems(updatedCart);
+  const savedItem = updatedCart.find((item) => item.Id === product.Id);
+  return savedItem ? savedItem.quantity : 1;
 }
 
 async function addToCartHandler(e) {
-  const product = await dataSource.findProductById(e.target.dataset.id);
+  const button = e.currentTarget;
+  const product = await dataSource.findProductById(button.dataset.id);
   if (product) {
-    addProductToCart(product);
+    const quantity = addProductToCart(product);
+    showAddedFeedback(button, quantity);
   }
 }
 
 updateCartCount();
 
-const addToCartBtn = document.getElementById("addToCart");
+const addToCartBtn = document.getElementById('addToCart');
 if (addToCartBtn) {
-  addToCartBtn.addEventListener("click", addToCartHandler);
+  addToCartBtn.addEventListener('click', addToCartHandler);
 }

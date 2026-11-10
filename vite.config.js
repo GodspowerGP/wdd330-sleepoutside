@@ -1,29 +1,47 @@
-import { resolve } from "path";
-import { defineConfig } from "vite";
+import { cpSync, existsSync } from 'fs';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
+
+function copyStaticAssets() {
+  return {
+    name: 'copy-static-assets',
+    closeBundle() {
+      const staticDirs = ['json', 'images'];
+      for (const dir of staticDirs) {
+        const srcDir = resolve(__dirname, 'src', dir);
+        const destDir = resolve(__dirname, 'dist', dir);
+        if (existsSync(srcDir)) {
+          cpSync(srcDir, destDir, { recursive: true });
+        }
+      }
+    },
+  };
+}
 
 export default defineConfig({
-  base: "./",
-  root: "src/",
+  base: './',
+  root: 'src/',
+  plugins: [copyStaticAssets()],
 
   build: {
-    outDir: "../dist",
+    outDir: '../dist',
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "src/index.html"),
-        cart: resolve(__dirname, "src/cart/index.html"),
-        checkout: resolve(__dirname, "src/checkout/index.html"),
+        main: resolve(__dirname, 'src/index.html'),
+        cart: resolve(__dirname, 'src/cart/index.html'),
+        checkout: resolve(__dirname, 'src/checkout/index.html'),
         product1: resolve(
           __dirname,
-          "src/product_pages/cedar-ridge-rimrock-2.html",
+          'src/product_pages/cedar-ridge-rimrock-2.html',
         ),
-        product2: resolve(__dirname, "src/product_pages/marmot-ajax-3.html"),
+        product2: resolve(__dirname, 'src/product_pages/marmot-ajax-3.html'),
         product3: resolve(
           __dirname,
-          "src/product_pages/northface-alpine-3.html",
+          'src/product_pages/northface-alpine-3.html',
         ),
         product4: resolve(
           __dirname,
-          "src/product_pages/northface-talus-4.html",
+          'src/product_pages/northface-talus-4.html',
         ),
       },
     },

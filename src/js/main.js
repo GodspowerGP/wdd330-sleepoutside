@@ -1,5 +1,5 @@
-import { updateCartCount } from "./utils.mjs";
+import { updateCartCount } from './utils.mjs';
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   updateCartCount();
 });
